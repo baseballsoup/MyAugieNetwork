@@ -1,0 +1,98 @@
+---
+title: "My Augie Network"
+output: html_notebook
+---
+
+
+```{r}
+library(tidyverse)
+library(visNetwork)
+library(tidygraph)
+library(ggraph)
+library(igraph)
+
+# Add all major information
+cs_name <- c("CS/SW Major")
+cs_major <- c("COSC 130", "COSC 210", "COSC 211", "COSC 235/PHYS 235", "COSC 236", "COSC 260", "COSC 327", "COSC 330", "COSC 350", "MATH 151", "MATH 320", "MATH 315")
+cs_elective <- c("COSC 225", "COSC 310", "COSC 215", "COSC 315/BSAD 315", "COSC 322", "COSC 342", "COSC 380", "COSC 212", "COSC 320")
+
+ds_name <- c("DS Major")
+ds_major <- c("COSC 210", "COSC 211", "COSC 212", "COSC 215", "BSAD 315/COSC 315", "COSC 322", "MATH 151", "MATH 152", "MATH 315", "MATH 320", "MATH 327")
+ds_elective <- c("BSAD 241/COSC 241", "BSAD 342/COSC 342", "COSC 260", "COSC 380", "MATH 220", "MATH 345", "MATH 397")
+
+cis_name <- c("CIS Major")
+cis_major <- c("COSC 130", "BSAD 205/COSC 205", "COSC 210", "COSC 211", "BSAD 241/COSC 241", "BSAD 315/COSC 315", "BSAD 342/COSC 342", "BSAD 320", "ECON 120", "ECON 270/PSYC 270")
+cis_elective <- c("ACCT 207", "ACCT 210", "BSAD 310", "BSAD 330", "COSC 235/PHYS 235", "COSC 260", "COSC 225")
+
+math_name <- c("Math Major")
+math_major <- c("MATH 151", "MATH 152", "MATH 153", "MATH 200", "MATH 220", "MATH 490", "COSC 210", "PHYS 221")
+math_elective <- c("MATH 340", "MATH 345", "MATH 350", "MATH 355", "MATH 310", "MATH 315", "MATH 320", "MATH 327", "MATH 330", "MATH 335", "MATH 397")
+
+phys_name <- c("Physics Major")
+phys_major <- c("PHYS 221", "PHYS 222", "PHYS 281", "PHYS 321", "PHYS 371", "PHYS 381", "MATH 151", "MATH 152", "MATH 153", "MATH 310")
+phys_elective <- c("PHYS 331", "PHYS 341", "PHYS 351", "PHYS 361", "PHYS 363", "PHYS 372", "PHYS 373", "PHYS 391","PHYS 395", "PHYS 397", "PHYS 399")
+
+bsad_name <- c("Bis Admin Major")
+bsad_major <- c("ACCT 210", "ACCT 211", "BSAD 205/COSC 205", "ECON 270/PSYC 270", "BSAD 310", "BSAD 320", "BSAD 330", "BSAD 340", "ACCT 382/BSAD 382", "BSAD 421")
+bsad_elective <- c("BSAD 490", "BSAD 495", "BSAD 499", "ECON 120", "ECON 121")
+
+# Add my courses taken/planned
+my_name <- c("Jared's Courses")
+my_courses <- c("COSC 210", "ECON 121", "ECON 270/PSYC 270", "MATH 151", "MATH 152", "PHYS 201", "PHYS 297", "COSC 211", "FYS 111", "PHYS 222", "ACCT 210", "COSC 260", "MATH 310", "COSC 235/PHYS 235", "PHYS 321", "BSAD 120", "COSC 236", "COSC 327", "MUSI 118", "PHYS 371", "ART 130", "COSC 212", "COSC 226", "MATH 320", "COSC 219", "COSC 215", "COSC 322", "ENGL 200", "NAST 320", "COSC 130", "COSC 350", "MATH 315", "RELI 254", "BSAD 315/COSC 315", "COSC 330", "COSC 380", "MATH 327")
+
+# Combine, sort, and remove duplicate classes
+all_courses <- c(cs_major, cs_elective, ds_major, ds_elective, cis_major, cis_elective, math_major, math_elective, phys_major, phys_elective, bsad_major, bsad_elective, my_courses)
+all_courses <- sort(all_courses[!duplicated(all_courses)])
+
+all_majors <- c(my_name, cs_name, ds_name, cis_name, math_name, phys_name, bsad_name)
+
+
+class_network <- data.frame("label" = c(all_majors, all_courses), "CompSci" = 0, "DataSci" = 0, "CIS" = 0, "Math" = 0, "Physics" = 0, "BSAD" = 0, "Jared" = 0 )
+
+
+# Connect classes to the major they are in
+class_network[(class_network$label %in% cs_major), ]$CompSci <- 1
+class_network[(class_network$label %in% cs_elective), ]$CompSci <- 5
+
+class_network[(class_network$label %in% ds_major), ]$DataSci <- 1
+class_network[(class_network$label %in% ds_elective), ]$DataSci <- 5
+
+class_network[(class_network$label %in% cis_major), ]$CIS <- 1
+class_network[(class_network$label %in% cis_elective), ]$CIS <- 5
+
+class_network[(class_network$label %in% math_major), ]$Math <- 1
+class_network[(class_network$label %in% math_elective), ]$Math <- 5
+
+class_network[(class_network$label %in% phys_major), ]$Physics <- 1
+class_network[(class_network$label %in% phys_elective), ]$Physics <- 5
+
+class_network[(class_network$label %in% bsad_major), ]$BSAD <- 1
+class_network[(class_network$label %in% bsad_elective), ]$BSAD <- 5
+
+class_network[(class_network$label %in% my_courses), ]$Jared <- 1
+
+
+# Create Node List
+class_network$id <- 1:length(c(all_majors,all_courses))
+node_list <- tibble(id = class_network$id, label = class_network$label)
+
+# Set edges and length correlating to being a major requirement or elective
+edge_list <- tibble(from =  class_network[class_network$label == "CS/SW Major",]$id, to = class_network[class_network$CompSci > 0,]$id, length = 100*class_network[class_network$CompSci > 0,]$CompSci)
+
+edge_list <- rbind(edge_list, tibble(from =  class_network[class_network$label == "DS Major",]$id, to = class_network[class_network$DataSci > 0,]$id, length = 100*class_network[class_network$DataSci > 0,]$DataSci))
+
+edge_list <- rbind(edge_list, tibble(from =  class_network[class_network$label == "CIS Major",]$id, to = class_network[class_network$CIS > 0,]$id, length = 100*class_network[class_network$CIS > 0,]$CIS))
+
+edge_list <- rbind(edge_list, tibble(from =  class_network[class_network$label == "Math Major",]$id, to = class_network[class_network$Math > 0,]$id, length = 100*class_network[class_network$Math > 0,]$Math))
+
+edge_list <- rbind(edge_list, tibble(from =  class_network[class_network$label == "Physics Major",]$id, to = class_network[class_network$Physics > 0,]$id, length = 100*class_network[class_network$Physics > 0,]$Physics))
+
+edge_list <- rbind(edge_list, tibble(from =  class_network[class_network$label == "Bis Admin Major",]$id, to = class_network[class_network$BSAD > 0,]$id, length = 100*class_network[class_network$BSAD > 0,]$BSAD))
+
+edge_list <- rbind(edge_list, tibble(from =  class_network[class_network$label == "Jared's Courses",]$id, to = class_network[class_network$Jared > 0,]$id, length = 100*class_network[class_network$Jared > 0,]$Jared))
+
+# Plot
+visNetwork(node_list, edge_list)
+
+```
+
